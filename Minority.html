@@ -1,0 +1,266 @@
+    
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Minority</title>
+<h1>Bias Demo: Broad Labels vs. Specific Groups</h1>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --text: #e5e7eb;
+      --accent: #22d3ee;
+      --muted: #94a3b8;
+      --good: #10b981;
+      --warn: #f59e0b;
+    }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: radial-gradient(1200px 600px at 10% 10%, #0b1220, var(--bg));
+      color: var(--text);
+      margin: 0;
+      padding: 2rem;
+      line-height: 1.5;
+    }
+    h1, h2 { margin: 0 0 0.5rem 0; }
+    h1 { font-size: 1.6rem; }
+    h2 { font-size: 1.1rem; color: var(--muted); }
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.00));
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 1rem;
+      margin: 1rem 0;
+    }
+    .controls {
+      display: flex; gap: 0.5rem; flex-wrap: wrap;
+      margin: 0.75rem 0 0.5rem 0;
+    }
+    button {
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      padding: 0.5rem 0.75rem;
+      cursor: pointer;
+    }
+    button:hover { border-color: var(--accent); }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding: 0.4rem 0.35rem;
+      text-align: left;
+    }
+    th { color: var(--muted); font-weight: 600; }
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.4rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      background: rgba(34, 211, 238, 0.15);
+      border: 1px solid rgba(34, 211, 238, 0.35);
+      color: var(--text);
+    }
+    .rate-good { color: var(--good); }
+    .rate-warn { color: var(--warn); }
+    .note {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    .quote {
+      border-left: 3px solid rgba(255,255,255,0.15);
+      padding-left: 0.75rem;
+      margin: 0.75rem 0;
+      color: var(--text);
+      font-style: italic;
+    }
+    .foot {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+    @media (max-width: 800px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h2>Bias in AI/ML from broad labels</h2>
+    <h2>Compare outcomes when identities are collapsed into “Minority” vs. kept specific</h2>
+  </header>
+
+  <section class="card">
+    <div class="quote">
+      “Don't let anyone call you a minority if you're Black or Hispanic or belong to some other ethnic group.
+      You're not less than anybody else.” — Gwendolyn Brooks (1917–2000)
+    </div>
+    <p class="note">
+      This demo simulates acceptance outcomes for veterans across several groups. Toggle between
+      “Specific groups” and “Collapsed label (Minority)” to see how broad labels can hide differences,
+      distort averages, and mislead models.
+    </p>
+    <div class="controls">
+      <button id="view-specific">View specific groups</button>
+      <button id="view-minority">View collapsed label (“Minority”)</button>
+      <button id="shuffle">Shuffle data (simulate sampling)</button>
+      <span class="badge" id="mode-badge">Mode: Specific</span>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="card">
+      <h2>Dataset (sample)</h2>
+      <table id="data-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Group</th>
+            <th>Accepted</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <p class="foot">Accepted: 1 = yes, 0 = no. Data is simulated for demonstration.</p>
+    </div>
+
+    <div class="card">
+      <h2>Summary statistics</h2>
+      <table id="summary-table">
+        <thead>
+          <tr>
+            <th>Group</th>
+            <th>Count</th>
+            <th>Acceptance rate</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <p class="note" id="summary-note"></p>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>What this illustrates</h2>
+    <ul>
+      <li><strong>Broad labels:</strong> Collapsing distinct identities into “Minority” erases distinctions and can mislead AI/ML models.</li>
+      <li><strong>Hidden differences:</strong> Aggregate rates for “Minority” can hide outcomes for specific groups (e.g., Native American veterans).</li>
+      <li><strong>Sampling bias:</strong> Small or under-sampled groups make averages unstable, amplifying error, and stereotype risk.</li>
+      <li><strong>Ethical takeaway:</strong> Use specific, culturally respectful labels and evaluate outcomes per group before collecting data.</li>
+    </ul>
+  </section>
+
+  <script>
+    // Base dataset: simulated outcomes for veterans across groups
+    const baseData = [
+      { group: "Native American Veteran", accepted: 1 },
+      { group: "Native American Veteran", accepted: 0 },
+      { group: "Black Veteran", accepted: 1 },
+      { group: "Black Veteran", accepted: 0 },
+      { group: "Black Veteran", accepted: 0 },
+      { group: "Hispanic Veteran", accepted: 1 },
+      { group: "Hispanic Veteran", accepted: 0 },
+      { group: "Other Veteran", accepted: 1 },
+      { group: "Other Veteran", accepted: 1 },
+      { group: "Other Veteran", accepted: 0 }
+    ];
+
+    // Map for collapsing specific groups into the broad "Minority" label
+    const collapseMap = group =>
+      ["Native American Veteran", "Black Veteran", "Hispanic Veteran"].includes(group)
+        ? "Minority"
+        : group;
+
+    let mode = "specific"; // "specific" or "minority"
+    let workingData = [...baseData];
+
+    function render() {
+      // Render dataset table
+      const dtBody = document.querySelector("#data-table tbody");
+      dtBody.innerHTML = "";
+      workingData.forEach((row, i) => {
+        const tr = document.createElement("tr");
+        const label = mode === "specific" ? row.group : collapseMap(row.group);
+        tr.innerHTML = `
+          <td>${i + 1}</td>
+          <td>${label}</td>
+          <td>${row.accepted}</td>
+        `;
+        dtBody.appendChild(tr);
+      });
+
+      // Compute summary stats
+      const grouped = {};
+      workingData.forEach(row => {
+        const key = mode === "specific" ? row.group : collapseMap(row.group);
+        if (!grouped[key]) grouped[key] = { count: 0, positives: 0 };
+        grouped[key].count += 1;
+        grouped[key].positives += row.accepted;
+      });
+
+      const stBody = document.querySelector("#summary-table tbody");
+      stBody.innerHTML = "";
+      Object.entries(grouped).forEach(([key, { count, positives }]) => {
+        const rate = positives / count;
+        const rateClass = rate >= 0.6 ? "rate-good" : "rate-warn";
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${key}</td>
+          <td>${count}</td>
+          <td class="${rateClass}">${(rate * 100).toFixed(1)}%</td>
+        `;
+        stBody.appendChild(tr);
+      });
+
+      const note = document.getElementById("summary-note");
+      const badge = document.getElementById("mode-badge");
+      if (mode === "specific") {
+        badge.textContent = "Mode: Specific";
+        note.textContent =
+          "Viewing outcomes per specific group. Differences are visible; small sample sizes still require care.";
+      } else {
+        badge.textContent = "Mode: Collapsed (“Minority”)";
+        note.textContent =
+          "Viewing outcomes after collapsing several identities into “Minority”. Aggregate rates can hide group-specific outcomes and reinforce stereotypes.";
+      }
+    }
+
+    function shuffleArray(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    // Event handlers
+    document.getElementById("view-specific").addEventListener("click", () => {
+      mode = "specific";
+      render();
+    });
+    document.getElementById("view-minority").addEventListener("click", () => {
+      mode = "minority";
+      render();
+    });
+    document.getElementById("shuffle").addEventListener("click", () => {
+      workingData = shuffleArray(workingData);
+      render();
+    });
+
+    // Initial render
+    render();
+  </script>
+</body>
+</html>
